@@ -1,0 +1,1 @@
+netsh advfirewall firewall add rule name="Nullsys" dir=in action=allow protocol=TCP localport=42424
